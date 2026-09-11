@@ -231,15 +231,14 @@ function CheckoutModal({ items, total, onClose }) {
 
     // AKSI A — Telegram
     try {
-      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: buildTgMsg(), parse_mode: "Markdown" }),
-      });
-    } catch (_) {
-      setStatus("tg_error");
+  await fetch("/api/send-telegram", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: buildTgMsg() }),
+  });
+} catch (_) {
+  setStatus("tg_error");
     }
-
     // AKSI B — WhatsApp redirect
     const waUrl = `https://wa.me/${WA_STORE_NUMBER}?text=${encodeURIComponent(buildWaMsg())}`;
     window.open(waUrl, "_blank");
