@@ -41,9 +41,9 @@ const PRODUCTS = {
     { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "https://images.unsplash.com/photo-1474495086132-c24bec3cbcf7?w=400&q=80" },
   ],
   drinks: [
-    { id: "d1", name: "Taro Latte Original",           price: 18000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80" },
-    { id: "d2", name: "Taro Latte Blueberry",          price: 20000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&q=80" },
-    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 21000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80" },
+    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80" },
+    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&q=80" },
+    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80" },
   ],
 };
 
