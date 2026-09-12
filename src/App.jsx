@@ -2,7 +2,7 @@
 // TAROBUN — E-Commerce SPA
 // Stack: React + Tailwind CSS (CDN) + Vanilla JS
 // ============================================================
-// SETUP: lihat README.md di root project ini.
+// SETUP: lihat README.md & SETUP_TELEGRAM.md di root project ini.
 // Secrets (token Telegram, dll) diisi lewat file .env, BUKAN di file ini.
 // ============================================================
 
@@ -49,6 +49,41 @@ const PRODUCTS = {
 
 const fmtPrice = (n) => "Rp " + n.toLocaleString("id-ID");
 
+// ─── BRAND MARK ────────────────────────────────────────────────
+// Mascot badge terinspirasi dari karakter kucing Tarobun: telinga
+// kecil di atas, wajah bulat tenang, pipi merona. Dipakai di header,
+// footer, dan sebagai elemen dekoratif di hero.
+function TarobunMark({ size = 44, className = "" }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="60" height="60" rx="20" fill="#3B1464" />
+      <path d="M14 14 L22 8 L20 20 Z" fill="#3B1464" />
+      <path d="M50 14 L42 8 L44 20 Z" fill="#3B1464" />
+      <circle cx="32" cy="35" r="20" fill="#FBF7EF" />
+      <path d="M23 32c2-3 5-3 7 0" stroke="#3B1464" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <path d="M34 32c2-3 5-3 7 0" stroke="#3B1464" strokeWidth="2.4" strokeLinecap="round" fill="none" />
+      <circle cx="21" cy="41" r="3.4" fill="#F3AFC0" opacity="0.8" />
+      <circle cx="43" cy="41" r="3.4" fill="#F3AFC0" opacity="0.8" />
+      <path d="M29 41c1.4 1.4 4.6 1.4 6 0" stroke="#3B1464" strokeWidth="2" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+
+// Bintang dekoratif ala stiker "Be Careful!" di kemasan Tarobun.
+function BurstBadge({ children, className = "" }) {
+  return (
+    <div className={`relative inline-flex items-center justify-center ${className}`}>
+      <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full drop-shadow-md" xmlns="http://www.w3.org/2000/svg">
+        <path
+          fill="#F6C445"
+          d="M50 0 L58 20 L78 10 L70 30 L100 32 L74 45 L92 62 L66 58 L68 88 L50 68 L32 88 L34 58 L8 62 L26 45 L0 32 L30 30 L22 10 L42 20 Z"
+        />
+      </svg>
+      <span className="relative text-[#3B1464] font-black text-center leading-tight px-4">{children}</span>
+    </div>
+  );
+}
+
 // ─── CUSTOM PACK SELECTOR (modal inner) ───────────────────────
 function CustomPackSelector({ onConfirm, onClose }) {
   const [counts, setCounts] = useState(
@@ -68,7 +103,7 @@ function CustomPackSelector({ onConfirm, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 relative" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl">×</button>
-        <h2 className="text-xl font-bold text-purple-900 mb-1">Family Pack Custom</h2>
+        <h2 className="text-xl font-bold text-[#3B1464] mb-1">Family Pack Custom</h2>
         <p className="text-sm text-gray-500 mb-4">Pilih total <strong>6 rasa</strong>. Sudah: <span className={total === 6 ? "text-green-600 font-bold" : "text-purple-600 font-semibold"}>{total}/6</span></p>
         <div className="space-y-3 mb-5">
           {BUNS_FLAVORS.map((f) => (
@@ -88,7 +123,7 @@ function CustomPackSelector({ onConfirm, onClose }) {
         <button
           onClick={() => total === 6 && onConfirm(counts)}
           disabled={total !== 6}
-          className="w-full py-3 rounded-2xl bg-purple-600 text-white font-semibold text-sm disabled:opacity-40 hover:bg-purple-700 transition"
+          className="w-full py-3 rounded-2xl bg-[#3B1464] text-white font-semibold text-sm disabled:opacity-40 hover:bg-[#4d1c85] transition"
         >
           Tambah ke Keranjang
         </button>
@@ -111,17 +146,17 @@ function ProductCard({ product, onAdd }) {
 
   return (
     <>
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-purple-50 hover:shadow-md transition-shadow flex flex-col">
-        <div className="h-40 overflow-hidden">
-          <img src={product.img} alt={product.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = `https://placehold.co/400x200/f3e8ff/7c3aed?text=${encodeURIComponent(product.name)}`; }} />
+      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-purple-50 hover:shadow-lg hover:-translate-y-0.5 transition-all flex flex-col">
+        <div className="h-40 overflow-hidden relative">
+          <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = `https://placehold.co/400x200/f3e8ff/3B1464?text=${encodeURIComponent(product.name)}`; }} />
         </div>
         <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-semibold text-purple-900 text-sm mb-1 leading-tight">{product.name}</h3>
+          <h3 className="font-semibold text-[#3B1464] text-sm mb-1 leading-tight">{product.name}</h3>
           <p className="text-xs text-gray-500 flex-1 mb-3 leading-relaxed">{product.desc}</p>
-          {product.fix && <p className="text-xs bg-purple-50 text-purple-700 rounded-lg px-2 py-1 mb-3">📦 {product.fix}</p>}
+          {product.fix && <p className="text-xs bg-purple-50 text-[#3B1464] rounded-lg px-2 py-1 mb-3 w-fit">📦 {product.fix}</p>}
           <div className="flex items-center justify-between mt-auto">
-            <span className="text-purple-700 font-bold text-sm">{fmtPrice(product.price)}</span>
-            <button onClick={handleAdd} className="bg-purple-600 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-purple-700 active:scale-95 transition">
+            <span className="text-[#3B1464] font-bold text-sm">{fmtPrice(product.price)}</span>
+            <button onClick={handleAdd} className="bg-[#3B1464] text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-[#4d1c85] active:scale-95 transition">
               {product.custom ? "Pilih Rasa" : "+ Tambah"}
             </button>
           </div>
@@ -147,9 +182,9 @@ function Cart({ items, onQty, onRemove, onCheckout }) {
 
   return (
     <div className="bg-white border border-purple-100 rounded-3xl p-5 shadow-sm sticky top-24">
-      <h2 className="text-lg font-bold text-purple-900 mb-4 flex items-center gap-2">
+      <h2 className="text-lg font-bold text-[#3B1464] mb-4 flex items-center gap-2">
         🛒 Keranjang
-        {items.length > 0 && <span className="bg-purple-600 text-white text-xs rounded-full px-2 py-0.5">{items.reduce((s, i) => s + i.qty, 0)}</span>}
+        {items.length > 0 && <span className="bg-[#3B1464] text-white text-xs rounded-full px-2 py-0.5">{items.reduce((s, i) => s + i.qty, 0)}</span>}
       </h2>
       {items.length === 0 ? (
         <p className="text-sm text-gray-400 text-center py-8">Keranjangmu masih kosong 🥺</p>
@@ -159,7 +194,7 @@ function Cart({ items, onQty, onRemove, onCheckout }) {
             {items.map((item) => (
               <div key={item.key} className="flex gap-2 items-start text-sm border-b border-purple-50 pb-3">
                 <div className="flex-1">
-                  <p className="font-medium text-purple-900 text-xs leading-tight">{item.label}</p>
+                  <p className="font-medium text-[#3B1464] text-xs leading-tight">{item.label}</p>
                   <p className="text-purple-500 text-xs">{fmtPrice(item.price)}</p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -172,12 +207,12 @@ function Cart({ items, onQty, onRemove, onCheckout }) {
             ))}
           </div>
           <div className="border-t border-purple-100 pt-3 mb-4">
-            <div className="flex justify-between text-sm font-bold text-purple-900">
+            <div className="flex justify-between text-sm font-bold text-[#3B1464]">
               <span>Total</span>
               <span>{fmtPrice(total)}</span>
             </div>
           </div>
-          <button onClick={onCheckout} className="w-full py-3 bg-purple-600 text-white rounded-2xl font-semibold text-sm hover:bg-purple-700 active:scale-98 transition shadow-md shadow-purple-200">
+          <button onClick={onCheckout} className="w-full py-3 bg-[#3B1464] text-white rounded-2xl font-semibold text-sm hover:bg-[#4d1c85] active:scale-98 transition shadow-md shadow-purple-200">
             Checkout →
           </button>
         </>
@@ -205,14 +240,16 @@ function CheckoutModal({ items, total, onClose }) {
   const buildDetail = () =>
     items.map((i) => `- ${i.qty}x ${i.label} (${fmtPrice(i.price)})`).join("\n");
 
+  // Catatan: tidak pakai markdown (*, _, dll) supaya baris status pembayaran
+  // yang di-update lewat tombol Telegram tetap rapi dan mudah di-parse ulang.
   const buildTgMsg = () =>
-    `🚨 *PESANAN BARU MASUK!* 🚨\n` +
+    `🚨 PESANAN BARU MASUK! 🚨\n` +
     `Nama: ${sanitize(form.name)}\n` +
     `No WA: ${sanitize(form.phone)}\n` +
     `Tipe: ${form.type}\n` +
     `Tanggal & Waktu: ${form.date} - ${form.time}\n\n` +
-    `*Detail Pesanan:*\n${buildDetail()}\n` +
-    `*Total: ${fmtPrice(total)}*`;
+    `📦 Detail Pesanan:\n${buildDetail()}\n\n` +
+    `Total: ${fmtPrice(total)}`;
 
   const buildWaMsg = () =>
     `Halo Tarobun! 👋 Saya ingin memesan:\n\n` +
@@ -229,15 +266,15 @@ function CheckoutModal({ items, total, onClose }) {
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
 
-    // AKSI A — Telegram
+    // AKSI A — Telegram (notifikasi masuk grup + tombol status pembayaran)
     try {
-  await fetch("/api/send-telegram", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: buildTgMsg() }),
-  });
-} catch (_) {
-  setStatus("tg_error");
+      await fetch("/api/send-telegram", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: buildTgMsg() }),
+      });
+    } catch (_) {
+      setStatus("tg_error");
     }
     // AKSI B — WhatsApp redirect
     const waUrl = `https://wa.me/${WA_STORE_NUMBER}?text=${encodeURIComponent(buildWaMsg())}`;
@@ -248,7 +285,7 @@ function CheckoutModal({ items, total, onClose }) {
 
   const inp = (field, label, type = "text", extra = {}) => (
     <div>
-      <label className="block text-xs font-semibold text-purple-800 mb-1">{label}</label>
+      <label className="block text-xs font-semibold text-[#3B1464] mb-1">{label}</label>
       <input
         type={type}
         value={form[field]}
@@ -264,16 +301,16 @@ function CheckoutModal({ items, total, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl">×</button>
-        <h2 className="text-xl font-bold text-purple-900 mb-1">Detail Pemesanan</h2>
+        <h2 className="text-xl font-bold text-[#3B1464] mb-1">Detail Pemesanan</h2>
         <p className="text-xs text-gray-400 mb-5">Isi data di bawah untuk konfirmasi pesananmu 🎀</p>
 
         {status === "done" ? (
           <div className="text-center py-8">
             <div className="text-5xl mb-3">🎉</div>
-            <h3 className="text-lg font-bold text-purple-900 mb-2">Pesanan Terkirim!</h3>
+            <h3 className="text-lg font-bold text-[#3B1464] mb-2">Pesanan Terkirim!</h3>
             <p className="text-sm text-gray-500 mb-1">Kamu diarahkan ke WhatsApp Tarobun.</p>
             {status === "tg_error" && <p className="text-xs text-amber-500">Catatan: notif Telegram gagal, tapi WA sudah terbuka.</p>}
-            <button onClick={onClose} className="mt-5 px-6 py-2 bg-purple-600 text-white rounded-full text-sm font-semibold hover:bg-purple-700 transition">Tutup</button>
+            <button onClick={onClose} className="mt-5 px-6 py-2 bg-[#3B1464] text-white rounded-full text-sm font-semibold hover:bg-[#4d1c85] transition">Tutup</button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -282,12 +319,12 @@ function CheckoutModal({ items, total, onClose }) {
             {inp("date", "Tanggal Pengambilan", "date")}
             {inp("time", "Waktu Pengambilan", "time")}
             <div>
-              <label className="block text-xs font-semibold text-purple-800 mb-2">Jenis Pengambilan</label>
+              <label className="block text-xs font-semibold text-[#3B1464] mb-2">Jenis Pengambilan</label>
               <div className="flex gap-3">
                 {["Pick Up di Toko", "Online Delivery"].map((opt) => (
                   <label key={opt} className="flex items-center gap-2 cursor-pointer text-sm">
-                    <input type="radio" name="type" value={opt} checked={form.type === opt} onChange={() => setForm((p) => ({ ...p, type: opt }))} className="accent-purple-600" />
-                    <span className={form.type === opt ? "text-purple-700 font-semibold" : "text-gray-600"}>{opt}</span>
+                    <input type="radio" name="type" value={opt} checked={form.type === opt} onChange={() => setForm((p) => ({ ...p, type: opt }))} className="accent-[#3B1464]" />
+                    <span className={form.type === opt ? "text-[#3B1464] font-semibold" : "text-gray-600"}>{opt}</span>
                   </label>
                 ))}
               </div>
@@ -295,14 +332,14 @@ function CheckoutModal({ items, total, onClose }) {
 
             {/* Ringkasan pesanan */}
             <div className="bg-purple-50 rounded-2xl p-4 mt-2">
-              <p className="text-xs font-bold text-purple-800 mb-2 uppercase tracking-wide">Ringkasan Pesanan</p>
+              <p className="text-xs font-bold text-[#3B1464] mb-2 uppercase tracking-wide">Ringkasan Pesanan</p>
               {items.map((i) => (
                 <div key={i.key} className="flex justify-between text-xs text-purple-700 mb-1">
                   <span>{i.qty}× {i.label}</span>
                   <span>{fmtPrice(i.price * i.qty)}</span>
                 </div>
               ))}
-              <div className="border-t border-purple-200 mt-2 pt-2 flex justify-between text-sm font-bold text-purple-900">
+              <div className="border-t border-purple-200 mt-2 pt-2 flex justify-between text-sm font-bold text-[#3B1464]">
                 <span>Total</span>
                 <span>{fmtPrice(total)}</span>
               </div>
@@ -314,7 +351,7 @@ function CheckoutModal({ items, total, onClose }) {
               </div>
             )}
 
-            <button onClick={handleSubmit} disabled={loading} className="w-full py-3 bg-purple-600 text-white rounded-2xl font-bold text-sm hover:bg-purple-700 active:scale-98 disabled:opacity-50 transition shadow-md shadow-purple-200">
+            <button onClick={handleSubmit} disabled={loading} className="w-full py-3 bg-[#3B1464] text-white rounded-2xl font-bold text-sm hover:bg-[#4d1c85] active:scale-98 disabled:opacity-50 transition shadow-md shadow-purple-200">
               {loading ? "Memproses..." : "📲 Konfirmasi & Buka WhatsApp"}
             </button>
           </div>
@@ -327,9 +364,11 @@ function CheckoutModal({ items, total, onClose }) {
 // ─── SECTION HEADER ───────────────────────────────────────────
 function SectionHeader({ emoji, title, subtitle }) {
   return (
-    <div className="mb-6">
-      <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">{emoji} {subtitle}</div>
-      <h2 className="text-2xl font-bold text-purple-900">{title}</h2>
+    <div className="mb-6 flex items-end justify-between border-b border-purple-100 pb-3">
+      <div>
+        <h2 className="text-2xl font-bold text-[#3B1464] flex items-center gap-2">{emoji} {title}</h2>
+      </div>
+      <span className="text-xs font-semibold text-[#3B1464] bg-[#F6C445]/30 px-3 py-1 rounded-full whitespace-nowrap">{subtitle}</span>
     </div>
   );
 }
@@ -338,7 +377,7 @@ function SectionHeader({ emoji, title, subtitle }) {
 function FloatingCart({ count, total, onClick }) {
   if (count === 0) return null;
   return (
-    <button onClick={onClick} className="fixed bottom-6 right-6 z-40 bg-purple-600 text-white rounded-2xl px-5 py-3 shadow-xl shadow-purple-300 flex items-center gap-3 hover:bg-purple-700 transition lg:hidden">
+    <button onClick={onClick} className="fixed bottom-6 right-6 z-40 bg-[#3B1464] text-white rounded-2xl px-5 py-3 shadow-xl shadow-purple-300 flex items-center gap-3 hover:bg-[#4d1c85] transition lg:hidden">
       <span className="text-xl">🛒</span>
       <div className="text-left">
         <p className="text-xs opacity-80">{count} item</p>
@@ -378,36 +417,41 @@ export default function App() {
   const cartProps = { items: cart, onQty: adjustQty, onRemove: removeItem, onCheckout: () => setShowCheckout(true) };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 font-sans">
+    <div className="min-h-screen bg-[#FBF7EF] font-sans">
       {/* HEADER */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-purple-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-[#FBF7EF]/90 backdrop-blur border-b border-purple-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-black text-lg shadow">T</div>
+            <TarobunMark size={44} />
             <div>
-              <h1 className="text-xl font-black text-purple-900 leading-none">Tarobun</h1>
-              <p className="text-xs text-purple-400">Freshly baked, daily</p>
+              <h1 className="text-xl font-black text-[#3B1464] leading-none">tarobun</h1>
+              <p className="text-[11px] text-purple-400">Freshly made bun.</p>
             </div>
           </div>
           {/* Mobile cart icon */}
           <button onClick={() => setShowMobileCart(true)} className="lg:hidden relative p-2">
             <span className="text-2xl">🛒</span>
-            {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{cartCount}</span>}
+            {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-[#3B1464] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{cartCount}</span>}
           </button>
         </div>
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-purple-900 via-purple-700 to-pink-700 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 relative z-10">
-          <p className="text-purple-300 text-sm font-medium mb-3 tracking-widest uppercase">Bakery · Specialty Buns</p>
-          <h2 className="text-4xl md:text-6xl font-black leading-tight mb-4">Roti Lembut<br />Penuh Cinta 🤍</h2>
-          <p className="text-purple-200 text-base md:text-lg max-w-lg mb-8">Tarobun hadir dengan isian krim premium yang tebal — dibuat segar setiap hari, siap bikin harimu lebih manis.</p>
-          <a href="#menu" className="inline-block bg-white text-purple-800 font-bold px-6 py-3 rounded-2xl hover:bg-purple-50 transition shadow-lg">Lihat Menu →</a>
+      <section className="relative overflow-hidden bg-[#3B1464] text-white">
+        <div className="max-w-6xl mx-auto px-6 py-16 md:py-24 relative z-10 grid md:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
+          <div>
+            <p className="text-purple-300 text-sm font-medium mb-3">Bakery · Isian Krim Tebal</p>
+            <h2 className="text-4xl md:text-6xl font-black leading-tight mb-4">Roti Lembut<br />Penuh Cinta 🤍</h2>
+            <p className="text-purple-200 text-base md:text-lg max-w-lg mb-8">Tarobun hadir dengan isian krim premium yang tebal — dibuat segar setiap hari, siap bikin harimu lebih manis.</p>
+            <a href="#menu" className="inline-block bg-[#F6C445] text-[#3B1464] font-bold px-6 py-3 rounded-2xl hover:brightness-105 transition shadow-lg">Lihat Menu →</a>
+          </div>
+          <div className="hidden md:flex justify-center">
+            <BurstBadge className="w-52 h-52 -rotate-6">Fresh<br />Setiap<br />Hari!</BurstBadge>
+          </div>
         </div>
         {/* Decorative blobs */}
-        <div className="absolute -top-10 -right-10 w-72 h-72 bg-pink-500/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-purple-300/20 rounded-full blur-2xl" />
+        <div className="absolute -top-10 -right-10 w-72 h-72 bg-[#F6C445]/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-pink-300/10 rounded-full blur-2xl" />
       </section>
 
       {/* MAIN CONTENT */}
@@ -448,8 +492,9 @@ export default function App() {
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-purple-900 text-purple-300 text-center text-xs py-8 mt-12">
-        <p className="font-bold text-white text-base mb-1">🍞 Tarobun</p>
+      <footer className="bg-[#3B1464] text-purple-300 text-center text-xs py-10 mt-12">
+        <div className="flex justify-center mb-3"><TarobunMark size={40} /></div>
+        <p className="font-bold text-white text-base mb-1">tarobun</p>
         <p>Freshly baked with love · {new Date().getFullYear()}</p>
       </footer>
 
