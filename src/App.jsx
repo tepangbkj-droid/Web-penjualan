@@ -24,28 +24,31 @@ const sanitize = (str) =>
     .replace(/'/g, "&#x27;");
 
 // ─── DATABASE PRODUK ──────────────────────────────────────────
-const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream", "Pine Poop"];
+const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream", "Lemon Mascarpone", "Pine Poop"];
 
 const PRODUCTS = {
   buns: [
-    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&q=80" },
-    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&q=80" },
-    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=400&q=80" },
-    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?w=400&q=80" },
-    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80" },
+    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.jpg" },
+    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.jpg" },
+    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg" },
+    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg" },
+    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg" },
     { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80" },
+    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg" },
   ],
   packs: [
-    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&q=80" },
-    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=400&q=80" },
-    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "https://images.unsplash.com/photo-1474495086132-c24bec3cbcf7?w=400&q=80" },
+    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg" },
+    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.jpg" },
+    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.jpg" },
   ],
   drinks: [
-    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?w=400&q=80" },
-    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=400&q=80" },
-    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&q=80" },
+    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.jpg" },
+    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.jpg" },
+    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.jpg" },
   ],
 };
+// Catatan: Tarobun Pine Poop masih pakai foto stok sementara karena belum
+// ada foto produk resmi untuk varian tsb — kirim fotonya kapan saja untuk diganti.
 
 const fmtPrice = (n) => "Rp " + n.toLocaleString("id-ID");
 
@@ -147,8 +150,8 @@ function ProductCard({ product, onAdd }) {
   return (
     <>
       <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-purple-50 hover:shadow-lg hover:-translate-y-0.5 transition-all flex flex-col">
-        <div className="h-40 overflow-hidden relative">
-          <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = `https://placehold.co/400x200/f3e8ff/3B1464?text=${encodeURIComponent(product.name)}`; }} />
+        <div className="aspect-square overflow-hidden relative bg-purple-50">
+          <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = `https://placehold.co/400x400/f3e8ff/3B1464?text=${encodeURIComponent(product.name)}`; }} />
         </div>
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-semibold text-[#3B1464] text-sm mb-1 leading-tight">{product.name}</h3>
