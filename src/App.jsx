@@ -36,8 +36,8 @@ const PRODUCTS = {
     { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg" }, // soldOut: true,
     { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg" }, // soldOut: true,
     { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg" }, // soldOut: true,
-    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80" }, // soldOut: true,
-    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg" }, // soldOut: true,
+    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80" },  soldOut: true,
+    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg" },  soldOut: true,
   ],
   packs: [
     { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg" }, // soldOut: true,
