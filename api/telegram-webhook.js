@@ -54,9 +54,17 @@ export default async function handler(req, res) {
     : `💳 Status Pembayaran: ⏳ Belum Dibayar (diubah oleh ${clickedBy}, ${now} WIB)`;
 
   // Ganti baris status lama (apa pun isinya) dengan baris status baru.
-  const newText = /💳 Status Pembayaran:.*/.test(oldText)
+  let newText = /💳 Status Pembayaran:.*/.test(oldText)
     ? oldText.replace(/💳 Status Pembayaran:.*/, statusLine)
     : `${oldText}\n\n${statusLine}`;
+
+  // Telegram menyimpan message.text dalam bentuk polos (tanda *bold* sudah
+  // dihapus saat pesan pertama kali dikirim). Supaya tampilan tetap bold
+  // setelah di-edit, tanda bintang dipasang lagi di bagian-bagian judul.
+  newText = newText
+    .replace(/PESANAN BARU MASUK!/, "*PESANAN BARU MASUK!*")
+    .replace(/📦 Detail Pesanan:/, "📦 *Detail Pesanan:*")
+    .replace(/Total: (Rp[\d.,]+)/, "Total: *$1*");
 
   const newReplyMarkup = {
     inline_keyboard: [
@@ -76,6 +84,7 @@ export default async function handler(req, res) {
         chat_id: chatId,
         message_id: messageId,
         text: newText,
+        parse_mode: "Markdown",
         reply_markup: newReplyMarkup,
       }),
     });

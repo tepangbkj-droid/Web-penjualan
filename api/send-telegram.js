@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Field 'text' wajib diisi." });
   }
 
-  // Tambahkan baris status pembayaran di akhir pesan (plain text, tanpa markdown,
-  // supaya nanti mudah & aman di-replace ulang saat tombol diklik di webhook).
+  // Baris status pembayaran ditambahkan polos (tanpa *bold*) supaya nanti
+  // mudah & aman di-replace ulang saat tombol diklik di webhook.
   const fullText = `${text}\n\n💳 Status Pembayaran: ⏳ Belum Dibayar`;
 
   const replyMarkup = {
@@ -46,6 +46,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         chat_id: CHAT_ID,
         text: fullText,
+        parse_mode: "Markdown",
         reply_markup: replyMarkup,
       }),
     });
