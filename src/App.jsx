@@ -24,30 +24,30 @@ const sanitize = (str) =>
     .replace(/'/g, "&#x27;");
 
 // ─── DATABASE PRODUK ──────────────────────────────────────────
-// Cara tandai produk HABIS/SOLD OUT: tinggal tambahkan  soldOut: true
-// di produk yang dimaksud (lihat contoh komentar di tiap baris).
-// Tombol "+ Tambah" otomatis berubah jadi "Habis" & tidak bisa diklik.
+// Cara tandai produk HABIS/SOLD OUT: ganti  soldOut: false  jadi
+// soldOut: true  pada produk yang dimaksud. Tombol "+ Tambah" otomatis
+// berubah jadi "Habis" & tidak bisa diklik/dimasukkan ke keranjang.
 const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream", "Lemon Mascarpone", "Pine Poop"];
 
 const PRODUCTS = {
   buns: [
-    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.jpg" }, // soldOut: true,
-    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.jpg" }, // soldOut: true,
-    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg" }, // soldOut: true,
-    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg" }, // soldOut: true,
-    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg" }, // soldOut: true,
-    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80" },  soldOut: true,
-    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg" },  soldOut: true,
+    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.jpg", soldOut: false },
+    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.jpg", soldOut: false },
+    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg", soldOut: false },
+    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg", soldOut: false },
+    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg", soldOut: false },
+    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80", soldOut: true },
+    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg", soldOut: true },
   ],
   packs: [
-    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg" }, // soldOut: true,
-    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.jpg" }, // soldOut: true,
-    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.jpg" }, // soldOut: true,
+    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg", soldOut: false },
+    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.jpg", soldOut: false },
+    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.jpg", soldOut: false },
   ],
   drinks: [
-    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.jpg" }, // soldOut: true,
-    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.jpg" }, // soldOut: true,
-    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.jpg" }, // soldOut: true,
+    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.jpg", soldOut: false },
+    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.jpg", soldOut: false },
+    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.jpg", soldOut: false },
   ],
 };
 // Catatan: Tarobun Pine Poop masih pakai foto stok sementara karena belum
@@ -56,7 +56,7 @@ const PRODUCTS = {
 const fmtPrice = (n) => "Rp " + n.toLocaleString("id-ID");
 
 // ─── BRAND MARK ────────────────────────────────────────────────
-// Logo resmi Tarobun (file: /public/logo.png).
+// Logo resmi Tarobun (file: /public/logo.png, transparan).
 function TarobunMark({ size = 44, className = "" }) {
   return (
     <img
@@ -64,7 +64,7 @@ function TarobunMark({ size = 44, className = "" }) {
       alt="Logo Tarobun"
       width={size}
       height={size}
-      className={`rounded-full object-cover shadow-sm ${className}`}
+      className={`object-contain ${className}`}
       style={{ width: size, height: size }}
     />
   );
