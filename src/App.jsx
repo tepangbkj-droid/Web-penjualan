@@ -24,27 +24,30 @@ const sanitize = (str) =>
     .replace(/'/g, "&#x27;");
 
 // ─── DATABASE PRODUK ──────────────────────────────────────────
+// Cara tandai produk HABIS/SOLD OUT: tinggal tambahkan  soldOut: true
+// di produk yang dimaksud (lihat contoh komentar di tiap baris).
+// Tombol "+ Tambah" otomatis berubah jadi "Habis" & tidak bisa diklik.
 const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream", "Lemon Mascarpone", "Pine Poop"];
 
 const PRODUCTS = {
   buns: [
-    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.jpg" },
-    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.jpg" },
-    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg" },
-    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg" },
-    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg" },
-    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80" },
-    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg" },
+    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.jpg" }, // soldOut: true,
+    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.jpg" }, // soldOut: true,
+    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg" }, // soldOut: true,
+    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg" }, // soldOut: true,
+    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg" }, // soldOut: true,
+    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80" }, // soldOut: true,
+    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg" }, // soldOut: true,
   ],
   packs: [
-    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg" },
-    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.jpg" },
-    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.jpg" },
+    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg" }, // soldOut: true,
+    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.jpg" }, // soldOut: true,
+    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.jpg" }, // soldOut: true,
   ],
   drinks: [
-    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.jpg" },
-    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.jpg" },
-    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.jpg" },
+    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.jpg" }, // soldOut: true,
+    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.jpg" }, // soldOut: true,
+    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.jpg" }, // soldOut: true,
   ],
 };
 // Catatan: Tarobun Pine Poop masih pakai foto stok sementara karena belum
@@ -53,21 +56,33 @@ const PRODUCTS = {
 const fmtPrice = (n) => "Rp " + n.toLocaleString("id-ID");
 
 // ─── BRAND MARK ────────────────────────────────────────────────
-// Mascot badge terinspirasi dari karakter kucing Tarobun: telinga
-// kecil di atas, wajah bulat tenang, pipi merona. Dipakai di header,
-// footer, dan sebagai elemen dekoratif di hero.
+// Logo resmi Tarobun (file: /public/logo.png).
 function TarobunMark({ size = 44, className = "" }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 64 64" className={className} xmlns="http://www.w3.org/2000/svg">
-      <rect x="2" y="2" width="60" height="60" rx="20" fill="#3B1464" />
-      <path d="M14 14 L22 8 L20 20 Z" fill="#3B1464" />
-      <path d="M50 14 L42 8 L44 20 Z" fill="#3B1464" />
-      <circle cx="32" cy="35" r="20" fill="#FBF7EF" />
-      <path d="M23 32c2-3 5-3 7 0" stroke="#3B1464" strokeWidth="2.4" strokeLinecap="round" fill="none" />
-      <path d="M34 32c2-3 5-3 7 0" stroke="#3B1464" strokeWidth="2.4" strokeLinecap="round" fill="none" />
-      <circle cx="21" cy="41" r="3.4" fill="#F3AFC0" opacity="0.8" />
-      <circle cx="43" cy="41" r="3.4" fill="#F3AFC0" opacity="0.8" />
-      <path d="M29 41c1.4 1.4 4.6 1.4 6 0" stroke="#3B1464" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <img
+      src="/logo.png"
+      alt="Logo Tarobun"
+      width={size}
+      height={size}
+      className={`rounded-full object-cover shadow-sm ${className}`}
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
+// Ikon sosial media (dipakai di footer).
+function TikTokIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16.6 5.82c-.9-.98-1.4-2.26-1.4-3.62h-3.13v13.44a2.6 2.6 0 1 1-2.6-2.7c.24 0 .48.03.7.08V9.79a5.86 5.86 0 0 0-.7-.04 5.83 5.83 0 1 0 5.83 5.83V9.34a8.9 8.9 0 0 0 4.7 1.35V7.56a5.5 5.5 0 0 1-3.4-1.74Z" />
+    </svg>
+  );
+}
+function WhatsAppIcon({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.5 14.4c-.3-.15-1.7-.85-2-.95-.27-.1-.46-.15-.66.15-.2.3-.75.94-.92 1.14-.17.2-.34.22-.63.07-.3-.15-1.24-.46-2.36-1.46-.87-.78-1.46-1.73-1.63-2.03-.17-.3-.02-.46.13-.6.13-.13.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.66-1.6-.9-2.18-.24-.58-.48-.5-.66-.5h-.56c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.87 1.22 3.07.15.2 2.1 3.2 5.08 4.5.71.3 1.26.49 1.7.63.71.22 1.36.19 1.87.12.57-.09 1.7-.7 1.94-1.37.24-.68.24-1.26.17-1.38-.07-.12-.27-.2-.57-.35Z" />
+      <path d="M12.02 2C6.5 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12.02 22C17.52 22 22 17.52 22 12S17.52 2 12.02 2Zm0 18.13c-1.7 0-3.28-.47-4.63-1.28l-.33-.2-3.01.79.8-2.93-.21-.3A8.1 8.1 0 0 1 3.9 12c0-4.48 3.65-8.13 8.13-8.13S20.15 7.52 20.15 12s-3.65 8.13-8.13 8.13Z" />
     </svg>
   );
 }
@@ -140,6 +155,7 @@ function ProductCard({ product, onAdd }) {
   const [showSelector, setShowSelector] = useState(false);
 
   const handleAdd = () => {
+    if (product.soldOut) return;
     if (product.custom) {
       setShowSelector(true);
     } else {
@@ -149,9 +165,14 @@ function ProductCard({ product, onAdd }) {
 
   return (
     <>
-      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-purple-50 hover:shadow-lg hover:-translate-y-0.5 transition-all flex flex-col">
+      <div className={`group bg-white rounded-2xl overflow-hidden shadow-sm border border-purple-50 flex flex-col ${product.soldOut ? "opacity-70" : "hover:shadow-lg hover:-translate-y-0.5 transition-all"}`}>
         <div className="aspect-square overflow-hidden relative bg-purple-50">
-          <img src={product.img} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = `https://placehold.co/400x400/f3e8ff/3B1464?text=${encodeURIComponent(product.name)}`; }} />
+          <img src={product.img} alt={product.name} className={`w-full h-full object-cover transition-transform duration-500 ${product.soldOut ? "grayscale" : "group-hover:scale-105"}`} onError={(e) => { e.target.src = `https://placehold.co/400x400/f3e8ff/3B1464?text=${encodeURIComponent(product.name)}`; }} />
+          {product.soldOut && (
+            <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+              <span className="bg-white text-[#3B1464] text-xs font-black tracking-wide px-3 py-1 rounded-full -rotate-6 shadow">HABIS</span>
+            </div>
+          )}
         </div>
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-semibold text-[#3B1464] text-sm mb-1 leading-tight">{product.name}</h3>
@@ -159,8 +180,12 @@ function ProductCard({ product, onAdd }) {
           {product.fix && <p className="text-xs bg-purple-50 text-[#3B1464] rounded-lg px-2 py-1 mb-3 w-fit">📦 {product.fix}</p>}
           <div className="flex items-center justify-between mt-auto">
             <span className="text-[#3B1464] font-bold text-sm">{fmtPrice(product.price)}</span>
-            <button onClick={handleAdd} className="bg-[#3B1464] text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-[#4d1c85] active:scale-95 transition">
-              {product.custom ? "Pilih Rasa" : "+ Tambah"}
+            <button
+              onClick={handleAdd}
+              disabled={product.soldOut}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-xl transition ${product.soldOut ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-[#3B1464] text-white hover:bg-[#4d1c85] active:scale-95"}`}
+            >
+              {product.soldOut ? "Habis" : product.custom ? "Pilih Rasa" : "+ Tambah"}
             </button>
           </div>
         </div>
@@ -422,13 +447,29 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FBF7EF] font-sans">
       {/* HEADER */}
-      <header className="sticky top-0 z-30 bg-[#FBF7EF]/90 backdrop-blur border-b border-purple-100 shadow-sm">
+      <header className="sticky top-0 z-30 bg-[#FBF7EF]/95 backdrop-blur border-b border-purple-100 shadow-sm">
+        {/* Info cabang */}
+        <div className="bg-[#3B1464] text-white text-center py-1.5 px-3">
+          <p className="text-[11px] md:text-xs leading-snug">
+            <span className="font-bold">🏠 Tarobun — Cabang Green Pramuka Square</span>
+            <span className="text-purple-200"> · Website ini khusus untuk pemesanan di cabang ini</span>
+            {" · "}
+            <a
+              href="https://maps.app.goo.gl/E2Gz3dCfK5E5rizF8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#F6C445] font-semibold underline underline-offset-2 hover:text-yellow-300"
+            >
+              📍 Lihat Lokasi
+            </a>
+          </p>
+        </div>
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <TarobunMark size={44} />
             <div>
               <h1 className="text-xl font-black text-[#3B1464] leading-none">tarobun</h1>
-              <p className="text-[11px] text-purple-400">Freshly made bun.</p>
+              <p className="text-[11px] text-purple-400">Green Pramuka Square</p>
             </div>
           </div>
           {/* Mobile cart icon */}
@@ -496,8 +537,37 @@ export default function App() {
 
       {/* FOOTER */}
       <footer className="bg-[#3B1464] text-purple-300 text-center text-xs py-10 mt-12">
-        <div className="flex justify-center mb-3"><TarobunMark size={40} /></div>
+        <div className="flex justify-center mb-3"><TarobunMark size={48} /></div>
         <p className="font-bold text-white text-base mb-1">tarobun</p>
+        <p className="mb-1">Cabang Green Pramuka Square</p>
+        <a
+          href="https://maps.app.goo.gl/E2Gz3dCfK5E5rizF8"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block text-[#F6C445] hover:text-yellow-300 underline underline-offset-2 mb-5"
+        >
+          📍 Lihat Lokasi Toko
+        </a>
+        <div className="flex justify-center gap-3 mb-6">
+          <a
+            href="https://www.tiktok.com/@tarobun.green.pra?_r=1&_t=ZS-99fft5nlAmK"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="TikTok Tarobun Green Pramuka Square"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#F6C445] hover:text-[#3B1464] flex items-center justify-center transition"
+          >
+            <TikTokIcon size={18} />
+          </a>
+          <a
+            href="https://whatsapp.com/channel/0029Vb9LVgq4Y9lmPVckde2J"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Saluran WhatsApp Tarobun"
+            className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#F6C445] hover:text-[#3B1464] flex items-center justify-center transition"
+          >
+            <WhatsAppIcon size={18} />
+          </a>
+        </div>
         <p>Freshly baked with love · {new Date().getFullYear()}</p>
       </footer>
 
