@@ -27,7 +27,7 @@ const sanitize = (str) =>
 // Cara tandai produk HABIS/SOLD OUT: ganti  soldOut: false  jadi
 // soldOut: true  pada produk yang dimaksud. Tombol "+ Tambah" otomatis
 // berubah jadi "Habis" & tidak bisa diklik/dimasukkan ke keranjang.
-const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream", "Lemon Mascarpone", "Pine Poop"];
+const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream", "Matcha", "Pine Poop"];
 
 const PRODUCTS = {
   buns: [
@@ -36,7 +36,7 @@ const PRODUCTS = {
     { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg", soldOut: false },
     { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg", soldOut: false },
     { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg", soldOut: false },
-    { id: "b6", name: "Tarobun Pine Poop",      price: 16000, desc: "Varian roti spesial dengan isian nanas yang unik dan gurih.",                            img: "https://images.unsplash.com/photo-1549931319-a545dcf3bc7b?w=400&q=80", soldOut: true },
+    { id: "b6", name: "Tarobun Matcha",      price: 16000, desc: "Dibuat dari premium matcha powder yang bikin mood kamu auto naik.",                            img: "/products/Matcha.png", soldOut: false },
     { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg", soldOut: true },
   ],
   packs: [
