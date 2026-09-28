@@ -1,108 +1,70 @@
 // ============================================================
-// /api/telegram-webhook — Vercel Serverless Function
-// Menerima update dari Telegram setiap kali ada anggota grup
-// yang menekan tombol "Sudah Dibayar" / "Belum Dibayar", lalu
-// meng-update pesan tersebut secara langsung (tidak perlu database —
-// status pembayaran "hidup" di dalam pesan Telegram itu sendiri).
-// ============================================================
-// SETUP (sekali saja, lihat SETUP_TELEGRAM.md):
-//   1. Deploy project ini ke Vercel dulu supaya dapat URL publik, misal:
-//      https://tarobun.vercel.app/api/telegram-webhook
-//   2. Daftarkan URL itu ke Telegram lewat perintah setWebhook (lihat SETUP_TELEGRAM.md).
+// /api/telegram-webhook — menerima klik tombol "Sudah/Belum Dibayar"
+// dari grup Telegram lalu meng-update pesan pesanan tsb.
 //
-// ENV VARS:
-//   TELEGRAM_BOT_TOKEN         → sama seperti di send-telegram.js
-//   TELEGRAM_WEBHOOK_SECRET    → (opsional tapi disarankan) string acak untuk
-//                                 memastikan request memang dari Telegram, bukan orang iseng.
+// PERUBAHAN KEAMANAN:
+//  • TELEGRAM_WEBHOOK_SECRET sekarang WAJIB (sebelumnya opsional).
+//  • Hanya menerima klik dari grup TELEGRAM_CHAT_ID milik Anda.
+//  • Hanya memproses pesan "PESANAN BARU MASUK".
+//
+// ENV: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_WEBHOOK_SECRET
 // ============================================================
+import { tgCall } from "./_lib/security.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(200).send("ok"); // Telegram hanya perlu 200, method lain diabaikan saja
+  if (req.method !== "POST") return res.status(200).send("ok");
+
+  const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (!SECRET) return res.status(500).json({ error: "TELEGRAM_WEBHOOK_SECRET belum diset." });
+  if (req.headers["x-telegram-bot-api-secret-token"] !== SECRET) {
+    return res.status(401).json({ error: "Invalid secret token" });
   }
 
-  const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-  const SECRET    = process.env.TELEGRAM_WEBHOOK_SECRET;
+  const callback = req.body?.callback_query;
+  if (!callback || !callback.message) return res.status(200).send("ok");
 
-  // Verifikasi request benar-benar dari Telegram (jika secret diset saat setWebhook)
-  if (SECRET) {
-    const incomingSecret = req.headers["x-telegram-bot-api-secret-token"];
-    if (incomingSecret !== SECRET) {
-      return res.status(401).json({ error: "Invalid secret token" });
-    }
+  const chatId = callback.message.chat.id;
+  if (String(chatId) !== String(process.env.TELEGRAM_CHAT_ID)) return res.status(200).send("ok");
+
+  const oldText = callback.message.text || "";
+  if (!oldText.includes("PESANAN BARU MASUK")) {
+    await tgCall("answerCallbackQuery", { callback_query_id: callback.id });
+    return res.status(200).send("ok");
   }
-
-  const update = req.body;
-  const callback = update?.callback_query;
-
-  // Update selain tombol yang diklik (misal chat biasa) — abaikan saja, cukup balas 200.
-  if (!callback) {
+  if (callback.data !== "mark_paid" && callback.data !== "mark_unpaid") {
     return res.status(200).send("ok");
   }
 
-  const data      = callback.data; // "mark_paid" | "mark_unpaid"
-  const chatId    = callback.message.chat.id;
-  const messageId = callback.message.message_id;
-  const oldText   = callback.message.text || "";
-  const clickedBy = callback.from.first_name + (callback.from.last_name ? ` ${callback.from.last_name}` : "");
-  const now       = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta", dateStyle: "short", timeStyle: "short" });
-
-  const isPaid = data === "mark_paid";
+  const isPaid = callback.data === "mark_paid";
+  const clickedBy = [callback.from.first_name, callback.from.last_name].filter(Boolean).join(" ");
+  const now = new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta", dateStyle: "short", timeStyle: "short" });
 
   const statusLine = isPaid
     ? `💳 Status Pembayaran: ✅ Sudah Dibayar (oleh ${clickedBy}, ${now} WIB)`
     : `💳 Status Pembayaran: ⏳ Belum Dibayar (diubah oleh ${clickedBy}, ${now} WIB)`;
 
-  // Ganti baris status lama (apa pun isinya) dengan baris status baru.
-  let newText = /💳 Status Pembayaran:.*/.test(oldText)
+  const newText = /💳 Status Pembayaran:.*/.test(oldText)
     ? oldText.replace(/💳 Status Pembayaran:.*/, statusLine)
     : `${oldText}\n\n${statusLine}`;
 
-  // Telegram menyimpan message.text dalam bentuk polos (tanda *bold* sudah
-  // dihapus saat pesan pertama kali dikirim). Supaya tampilan tetap bold
-  // setelah di-edit, tanda bintang dipasang lagi di bagian-bagian judul.
-  newText = newText
-    .replace(/PESANAN BARU MASUK!/, "*PESANAN BARU MASUK!*")
-    .replace(/📦 Detail Pesanan:/, "📦 *Detail Pesanan:*")
-    .replace(/Total: (Rp[\d.,]+)/, "Total: *$1*");
-
-  const newReplyMarkup = {
-    inline_keyboard: [
-      [
-        { text: isPaid ? "⬜ Belum Dibayar" : "✅ Sudah Dibayar", callback_data: isPaid ? "mark_unpaid" : "mark_paid" },
-        { text: isPaid ? "✅ Sudah Dibayar (aktif)" : "⬜ Belum Dibayar (aktif)", callback_data: isPaid ? "mark_paid" : "mark_unpaid" },
-      ],
-    ],
-  };
-
   try {
-    // 1) Update teks pesan supaya semua anggota grup langsung lihat status terbaru
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        message_id: messageId,
-        text: newText,
-        parse_mode: "Markdown",
-        reply_markup: newReplyMarkup,
-      }),
+    await tgCall("editMessageText", {
+      chat_id: chatId,
+      message_id: callback.message.message_id,
+      text: newText,
+      reply_markup: {
+        inline_keyboard: [[
+          { text: isPaid ? "⬜ Belum Dibayar" : "✅ Sudah Dibayar", callback_data: isPaid ? "mark_unpaid" : "mark_paid" },
+          { text: isPaid ? "✅ Sudah Dibayar (aktif)" : "⬜ Belum Dibayar (aktif)", callback_data: isPaid ? "mark_paid" : "mark_unpaid" },
+        ]],
+      },
     });
-
-    // 2) Kasih notifikasi kecil (toast) ke orang yang klik, biar tahu aksinya berhasil
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        callback_query_id: callback.id,
-        text: isPaid ? "✅ Ditandai Sudah Dibayar" : "⏳ Ditandai Belum Dibayar",
-      }),
+    await tgCall("answerCallbackQuery", {
+      callback_query_id: callback.id,
+      text: isPaid ? "✅ Ditandai Sudah Dibayar" : "⏳ Ditandai Belum Dibayar",
     });
-
-    return res.status(200).send("ok");
   } catch (err) {
-    // Tetap balas 200 ke Telegram supaya tidak retry terus-menerus, tapi log error-nya
     console.error("telegram-webhook error:", err);
-    return res.status(200).send("ok");
   }
+  return res.status(200).send("ok");
 }
