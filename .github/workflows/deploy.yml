@@ -1,5 +1,10 @@
 name: Deploy to GitHub Pages
 
+# CATATAN: GitHub Pages hanya hosting statis — folder /api (Telegram) TIDAK berjalan di sini.
+# Untuk fitur pesanan + kritik/saran → Telegram, deploy lewat Vercel (lihat README.md).
+# Workflow ini tetap dipertahankan hanya sebagai build check. Token Telegram sudah
+# DIHAPUS dari sini karena variabel VITE_* ikut ter-bundle ke JavaScript publik.
+
 on:
   push:
     branches: ["main"]
@@ -29,9 +34,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_TELEGRAM_BOT_TOKEN: ${{ secrets.VITE_TELEGRAM_BOT_TOKEN }}
-          VITE_TELEGRAM_CHAT_ID: ${{ secrets.VITE_TELEGRAM_CHAT_ID }}
           VITE_WA_STORE_NUMBER: ${{ secrets.VITE_WA_STORE_NUMBER }}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.VITE_TURNSTILE_SITE_KEY }}
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
