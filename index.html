@@ -4,9 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tarobun — Freshly Baked, Daily</title>
+    <meta name="description" content="Tarobun Green Pramuka Square — roti lembut isian krim tebal, dibuat segar setiap hari. Pesan online, ambil di toko." />
+    <meta name="theme-color" content="#3B1464" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="apple-touch-icon" href="/logo.webp" />
+    <link rel="preload" as="image" href="/logo.webp" type="image/webp" />
+    <!-- Splash instan: tampil sebelum JavaScript selesai dimuat, jadi tidak ada layar putih kosong -->
+    <style>
+      html,body{margin:0;background:#FBF7EF}
+      .splash{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#3B1464;color:#F6C445;font:800 22px/1 system-ui,sans-serif;letter-spacing:.5px}
+      .splash img{width:72px;height:72px;animation:sp 1.2s ease-in-out infinite}
+      @keyframes sp{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="splash"><img src="/logo.webp" alt="" width="72" height="72" /><span>tarobun</span></div>
+    </div>
+    <noscript>Aktifkan JavaScript untuk memesan di Tarobun.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
