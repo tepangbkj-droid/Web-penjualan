@@ -2,26 +2,19 @@
 // TAROBUN — E-Commerce SPA
 // Stack: React + Tailwind CSS (CDN) + Vanilla JS
 // ============================================================
-// SETUP: lihat README.md & SETUP_TELEGRAM.md di root project ini.
-// Secrets (token Telegram, dll) diisi lewat file .env, BUKAN di file ini.
+// SETUP: lihat README.md. Secrets (token Telegram, dll) diisi di Environment
+// Variables Vercel (tanpa awalan VITE_), BUKAN di file ini.
 // ============================================================
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
+import { WA_STORE_NUMBER, fmtPrice } from "./config.js";
+import Turnstile, { turnstileEnabled } from "./Turnstile.jsx";
 
-// ─── CONFIG (isi lewat file .env, JANGAN hardcode di sini) ───
-const TELEGRAM_BOT_TOKEN = import.meta.env.VITE_TELEGRAM_BOT_TOKEN || "";
-const TELEGRAM_CHAT_ID   = import.meta.env.VITE_TELEGRAM_CHAT_ID || "";
-const WA_STORE_NUMBER    = import.meta.env.VITE_WA_STORE_NUMBER || "6285899932582"; // format: 62xxx tanpa +
-// ─────────────────────────────────────────────────────────────
+// Kritik & Saran dimuat belakangan (lazy) → halaman awal jauh lebih ringan.
+const Feedback = lazy(() => import("./Feedback.jsx"));
 
-// ─── SANITASI INPUT (mencegah XSS) ───────────────────────────
-const sanitize = (str) =>
-  String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;");
+// CATATAN KEAMANAN: token bot Telegram TIDAK boleh ada di sisi browser (variabel VITE_*
+// ikut ter-bundle & bisa dibaca siapa saja). Pengiriman ke Telegram dilakukan lewat /api/*.
 
 // ─── DATABASE PRODUK ──────────────────────────────────────────
 // Cara tandai produk HABIS/SOLD OUT: ganti  soldOut: false  jadi
@@ -31,39 +24,38 @@ const BUNS_FLAVORS = ["Butter", "Coklat", "Vanilla", "Raspberry", "Peach Cream",
 
 const PRODUCTS = {
   buns: [
-    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.jpg", soldOut: false },
-    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.jpg", soldOut: false },
-    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.jpg", soldOut: false },
-    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.jpg", soldOut: false },
-    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.jpg", soldOut: false },
-    { id: "b6", name: "Tarobun Matcha",      price: 16000, desc: "Dibuat dari premium matcha powder yang bikin mood kamu auto naik.",                            img: "/products/Matcha.png", soldOut: false },
-    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: "/products/lemon-mascarpone.jpg", soldOut: true },
+    { id: "b1", name: "Tarobun Butter (OG)",   price: 13000, desc: "Roti lembut dengan krim mentega klasik yang kaya.",                                      img: "/products/butter.webp", soldOut: false },
+    { id: "b2", name: "Tarobun Chocolate",      price: 16000, desc: "Isian krim cokelat yang manis, halus, dan pekat.",                                       img: "/products/chocolate.webp", soldOut: false },
+    { id: "b3", name: "Tarobun Vanilla",        price: 16000, desc: "Krim vanila klasik yang lembut dan nyaman di lidah.",                                    img: "/products/vanilla.webp", soldOut: false },
+    { id: "b4", name: "Tarobun Peach Cream",    price: 17000, desc: "Krim buah peach yang juicy dan segar.",                                                  img: "/products/peach-cream.webp", soldOut: false },
+    { id: "b5", name: "Tarobun Raspberry",      price: 17000, desc: "Krim raspberry manis dengan sedikit asam yang menyegarkan.",                             img: "/products/raspberry.webp", soldOut: false },
+    { id: "b6", name: "Tarobun Matcha",      price: 16000, desc: "Dibuat dari premium matcha powder yang bikin mood kamu auto naik.",                            img: "/products/matcha.webp", soldOut: false },
+    { id: "b7", name: "Tarobun Lemon (Mascarpone)", price: 17000, desc: "Krim lemon mascarpone yang creamy dengan sentuhan asam segar.",                       img: null /* taruh foto di /products/lemon-mascarpone.webp lalu ganti null */, soldOut: true },
   ],
   packs: [
-    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.jpg", soldOut: false },
-    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.jpg", soldOut: false },
-    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.jpg", soldOut: false },
+    { id: "p1", name: "Family Pack Custom",    price: 88000, desc: "Pilih 6 rasa sesukamu! Kombinasi bebas dari semua varian.", custom: true,                 img: "/products/family-pack-custom.webp", soldOut: false },
+    { id: "p2", name: "Family Pack VanCok",    price: 88000, desc: "Isi fix: 3 Vanilla + 3 Coklat. Pasangan sempurna yang tak pernah gagal.", fix: "3 Vanilla + 3 Coklat",    img: "/products/family-pack-vancok.webp", soldOut: false },
+    { id: "p3", name: "Family Pack BuVanCok",  price: 88000, desc: "Isi fix: 2 Butter + 2 Vanilla + 2 Coklat. Trio klasik dalam satu box.", fix: "2 Butter + 2 Vanilla + 2 Coklat", img: "/products/family-pack-buvancok.webp", soldOut: false },
   ],
   drinks: [
-    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.jpg", soldOut: false },
-    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.jpg", soldOut: false },
-    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.jpg", soldOut: false },
+    { id: "d1", name: "Taro Latte Original",           price: 22000, desc: "Minuman susu creamy dengan rasa taro khas Tarobun yang pekat dan manis pas.",                                              img: "/products/tarolatte-original.webp", soldOut: false },
+    { id: "d2", name: "Taro Latte Blueberry",          price: 25000, desc: "Perpaduan taro latte creamy dengan tambahan blueberry manis dan sedikit asam.",                                            img: "/products/tarolatte-blueberry.webp", soldOut: false },
+    { id: "d3", name: "Taro Latte Strawberry Cheese",  price: 25000, desc: "Varian favorit: taro latte dengan keju dan stroberi — creamy, milky, manis, gurih, ada sensasi sedikit asin.",            img: "/products/tarolatte-strawberry-cheese.webp", soldOut: false },
   ],
 };
 // Catatan: Tarobun Pine Poop masih pakai foto stok sementara karena belum
 // ada foto produk resmi untuk varian tsb — kirim fotonya kapan saja untuk diganti.
 
-const fmtPrice = (n) => "Rp " + n.toLocaleString("id-ID");
-
 // ─── BRAND MARK ────────────────────────────────────────────────
-// Logo resmi Tarobun (file: /public/logo.png, transparan).
+// Logo resmi Tarobun (file: /public/logo.webp, transparan).
 function TarobunMark({ size = 44, className = "" }) {
   return (
     <img
-      src="/logo.png"
+      src="/logo.webp"
       alt="Logo Tarobun"
       width={size}
       height={size}
+      decoding="async"
       className={`object-contain ${className}`}
       style={{ width: size, height: size }}
     />
@@ -150,8 +142,47 @@ function CustomPackSelector({ onConfirm, onClose }) {
   );
 }
 
+// ─── GAMBAR PRODUK (lazy + skeleton + fade-in, tanpa request eksternal) ───
+function ProductImage({ src, alt, priority, soldOut }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(!src);
+  const ref = useRef(null);
+
+  // gambar yang sudah ada di cache kadang selesai sebelum onLoad terpasang
+  useEffect(() => {
+    if (ref.current?.complete && ref.current.naturalWidth > 0) setLoaded(true);
+  }, []);
+
+  if (failed) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-purple-50 text-[#3B1464]/60">
+        <span className="text-4xl mb-1">🍞</span>
+        <span className="text-[11px] px-3 text-center leading-tight">{alt}</span>
+      </div>
+    );
+  }
+  return (
+    <>
+      {!loaded && <div className="absolute inset-0 skeleton" />}
+      <img
+        ref={ref}
+        src={src}
+        alt={alt}
+        width={640}
+        height={640}
+        loading={priority ? "eager" : "lazy"}
+        fetchpriority={priority ? "high" : "auto"}
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+        onError={() => setFailed(true)}
+        className={`w-full h-full object-cover transition-[opacity,transform] duration-500 ${loaded ? "opacity-100" : "opacity-0"} ${soldOut ? "grayscale" : "group-hover:scale-105"}`}
+      />
+    </>
+  );
+}
+
 // ─── PRODUCT CARD ─────────────────────────────────────────────
-function ProductCard({ product, onAdd }) {
+function ProductCard({ product, onAdd, priority = false }) {
   const [showSelector, setShowSelector] = useState(false);
 
   const handleAdd = () => {
@@ -167,7 +198,7 @@ function ProductCard({ product, onAdd }) {
     <>
       <div className={`group bg-white rounded-2xl overflow-hidden shadow-sm border border-purple-50 flex flex-col ${product.soldOut ? "opacity-70" : "hover:shadow-lg hover:-translate-y-0.5 transition-all"}`}>
         <div className="aspect-square overflow-hidden relative bg-purple-50">
-          <img src={product.img} alt={product.name} className={`w-full h-full object-cover transition-transform duration-500 ${product.soldOut ? "grayscale" : "group-hover:scale-105"}`} onError={(e) => { e.target.src = `https://placehold.co/400x400/f3e8ff/3B1464?text=${encodeURIComponent(product.name)}`; }} />
+          <ProductImage src={product.img} alt={product.name} priority={priority} soldOut={product.soldOut} />
           {product.soldOut && (
             <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
               <span className="bg-white text-[#3B1464] text-xs font-black tracking-wide px-3 py-1 rounded-full -rotate-6 shadow">HABIS</span>
@@ -254,7 +285,12 @@ function CheckoutModal({ items, total, onClose }) {
   const [form, setForm] = useState({ name: "", phone: "", date: "", time: "", type: "Pick Up di Toko" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [status, setStatus]   = useState(null); // null | "tg_error" | "done"
+  const [done, setDone]       = useState(false);
+  const [tgError, setTgError] = useState(false);
+  const [hp, setHp]           = useState(""); // honeypot anti-bot
+  const [cfToken, setCfToken] = useState("");
+  const [resetKey, setResetKey] = useState(0);
+  const startedAt = useRef(Date.now());
 
   const validate = () => {
     const e = {};
@@ -267,17 +303,6 @@ function CheckoutModal({ items, total, onClose }) {
 
   const buildDetail = () =>
     items.map((i) => `- ${i.qty}x ${i.label} (${fmtPrice(i.price)})`).join("\n");
-
-  // Catatan: tidak pakai markdown (*, _, dll) supaya baris status pembayaran
-  // yang di-update lewat tombol Telegram tetap rapi dan mudah di-parse ulang.
-  const buildTgMsg = () =>
-    `🚨 PESANAN BARU MASUK! 🚨\n` +
-    `Nama: ${sanitize(form.name)}\n` +
-    `No WA: ${sanitize(form.phone)}\n` +
-    `Tipe: ${form.type}\n` +
-    `Tanggal & Waktu: ${form.date} - ${form.time}\n\n` +
-    `📦 Detail Pesanan:\n${buildDetail()}\n\n` +
-    `Total: ${fmtPrice(total)}`;
 
   const buildWaMsg = () =>
     `Halo Tarobun! 👋 Saya ingin memesan:\n\n` +
@@ -292,23 +317,38 @@ function CheckoutModal({ items, total, onClose }) {
   const handleSubmit = async () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
+    if (turnstileEnabled && !cfToken) { setErrors({ captcha: "Selesaikan verifikasi keamanan dulu." }); return; }
     setLoading(true);
 
-    // AKSI A — Telegram (notifikasi masuk grup + tombol status pembayaran)
+    // AKSI A — Telegram (server yang menyusun & memvalidasi pesan; browser hanya kirim data)
+    let tgFailed = false;
     try {
-      await fetch("/api/send-telegram", {
+      const res = await fetch("/api/send-telegram", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: buildTgMsg() }),
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          type: form.type,
+          date: form.date,
+          time: form.time,
+          items: items.map((i) => ({ label: i.label, qty: i.qty, price: i.price })),
+          hp,
+          elapsed: Date.now() - startedAt.current,
+          cfToken,
+        }),
       });
+      if (!res.ok) tgFailed = true;
     } catch (_) {
-      setStatus("tg_error");
+      tgFailed = true;
     }
-    // AKSI B — WhatsApp redirect
+    if (tgFailed) { setTgError(true); setCfToken(""); setResetKey((k) => k + 1); }
+
+    // AKSI B — WhatsApp redirect (tetap jalan walau Telegram gagal)
     const waUrl = `https://wa.me/${WA_STORE_NUMBER}?text=${encodeURIComponent(buildWaMsg())}`;
-    window.open(waUrl, "_blank");
+    window.open(waUrl, "_blank", "noopener");
     setLoading(false);
-    setStatus("done");
+    setDone(true);
   };
 
   const inp = (field, label, type = "text", extra = {}) => (
@@ -332,12 +372,12 @@ function CheckoutModal({ items, total, onClose }) {
         <h2 className="text-xl font-bold text-[#3B1464] mb-1">Detail Pemesanan</h2>
         <p className="text-xs text-gray-400 mb-5">Isi data di bawah untuk konfirmasi pesananmu 🎀</p>
 
-        {status === "done" ? (
+        {done ? (
           <div className="text-center py-8">
             <div className="text-5xl mb-3">🎉</div>
             <h3 className="text-lg font-bold text-[#3B1464] mb-2">Pesanan Terkirim!</h3>
             <p className="text-sm text-gray-500 mb-1">Kamu diarahkan ke WhatsApp Tarobun.</p>
-            {status === "tg_error" && <p className="text-xs text-amber-500">Catatan: notif Telegram gagal, tapi WA sudah terbuka.</p>}
+            {tgError && <p className="text-xs text-amber-500">Catatan: notif Telegram gagal, tapi WA sudah terbuka.</p>}
             <button onClick={onClose} className="mt-5 px-6 py-2 bg-[#3B1464] text-white rounded-full text-sm font-semibold hover:bg-[#4d1c85] transition">Tutup</button>
           </div>
         ) : (
@@ -373,11 +413,22 @@ function CheckoutModal({ items, total, onClose }) {
               </div>
             </div>
 
-            {status === "tg_error" && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
-                ⚠ Notifikasi Telegram gagal (cek koneksi). Kamu tetap bisa lanjut ke WhatsApp.
-              </div>
-            )}
+            {/* Honeypot: tersembunyi untuk manusia, bot biasanya mengisinya */}
+            <input
+              type="text"
+              name="company_url"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              value={hp}
+              onChange={(e) => setHp(e.target.value)}
+              style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+            />
+
+            <div>
+              <Turnstile key={resetKey} onToken={(t) => { setCfToken(t); if (t) setErrors((p) => ({ ...p, captcha: "" })); }} />
+              {errors.captcha && <p className="text-xs text-red-500 mt-1">{errors.captcha}</p>}
+            </div>
 
             <button onClick={handleSubmit} disabled={loading} className="w-full py-3 bg-[#3B1464] text-white rounded-2xl font-bold text-sm hover:bg-[#4d1c85] active:scale-98 disabled:opacity-50 transition shadow-md shadow-purple-200">
               {loading ? "Memproses..." : "📲 Konfirmasi & Buka WhatsApp"}
@@ -415,6 +466,23 @@ function FloatingCart({ count, total, onClick }) {
   );
 }
 
+// ─── LAZY ON VIEW: render anak hanya saat hampir terlihat di layar ─
+function LazyOnView({ children, minHeight = 300, margin = "500px" }) {
+  const ref = useRef(null);
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    if (show || !ref.current) return undefined;
+    if (!("IntersectionObserver" in window)) { setShow(true); return undefined; }
+    const io = new IntersectionObserver(
+      (entries) => { if (entries.some((e) => e.isIntersecting)) { setShow(true); io.disconnect(); } },
+      { rootMargin: margin }
+    );
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, [show, margin]);
+  return <div ref={ref} style={show ? undefined : { minHeight }}>{show ? children : null}</div>;
+}
+
 // ─── MAIN APP ─────────────────────────────────────────────────
 export default function App() {
   const [cart, setCart]           = useState([]);
@@ -447,7 +515,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FBF7EF] font-sans">
       {/* HEADER */}
-      <header className="sticky top-0 z-30 bg-[#FBF7EF]/95 backdrop-blur border-b border-purple-100 shadow-sm">
+      <header className="sticky top-0 z-30 bg-[#FBF7EF] border-b border-purple-100 shadow-sm">
         {/* Info cabang */}
         <div className="bg-[#3B1464] text-white text-center py-1.5 px-3">
           <p className="text-[11px] md:text-xs leading-snug">
@@ -494,8 +562,9 @@ export default function App() {
           </div>
         </div>
         {/* Decorative blobs */}
-        <div className="absolute -top-10 -right-10 w-72 h-72 bg-[#F6C445]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-pink-300/10 rounded-full blur-2xl" />
+        {/* Dekorasi pakai radial-gradient (ringan), bukan blur-3xl yang berat di GPU HP */}
+        <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(246,196,69,0.16) 0%, transparent 70%)" }} />
+        <div className="absolute -bottom-10 left-1/3 w-56 h-56 rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(249,168,212,0.14) 0%, transparent 70%)" }} />
       </section>
 
       {/* MAIN CONTENT */}
@@ -507,7 +576,7 @@ export default function App() {
             <section>
               <SectionHeader emoji="🍞" title="Tarobun Satuan" subtitle="Best Seller" />
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {PRODUCTS.buns.map((p) => <ProductCard key={p.id} product={p} onAdd={addToCart} />)}
+                {PRODUCTS.buns.map((p, idx) => <ProductCard key={p.id} product={p} onAdd={addToCart} priority={idx < 2} />)}
               </div>
             </section>
 
@@ -534,6 +603,13 @@ export default function App() {
           </aside>
         </div>
       </main>
+
+      {/* KRITIK & SARAN (lazy: baru diunduh saat mendekati layar) */}
+      <LazyOnView minHeight={320}>
+        <Suspense fallback={<div className="max-w-3xl mx-auto px-4 pb-16"><div className="skeleton rounded-3xl h-72" /></div>}>
+          <Feedback />
+        </Suspense>
+      </LazyOnView>
 
       {/* FOOTER */}
       <footer className="bg-[#3B1464] text-purple-300 text-center text-xs py-10 mt-12">
