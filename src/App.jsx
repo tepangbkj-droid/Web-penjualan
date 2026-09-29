@@ -466,10 +466,17 @@ function FloatingCart({ count, total, onClick }) {
   );
 }
 
+// Link langsung (mis. dibagikan ke pelanggan) yang harus membuka bagian Kritik & Saran seketika,
+// bukan menunggu pengunjung scroll ke situ.
+const FEEDBACK_DEEP_LINKS = ["#kritik-saran", "#kritik", "#saran"];
+const hasFeedbackDeepLink = () =>
+  typeof window !== "undefined" && FEEDBACK_DEEP_LINKS.includes(window.location.hash);
+
 // ─── LAZY ON VIEW: render anak hanya saat hampir terlihat di layar ─
+// (dilewati kalau halaman dibuka lewat link langsung ke Kritik & Saran)
 function LazyOnView({ children, minHeight = 300, margin = "500px" }) {
   const ref = useRef(null);
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(hasFeedbackDeepLink);
   useEffect(() => {
     if (show || !ref.current) return undefined;
     if (!("IntersectionObserver" in window)) { setShow(true); return undefined; }

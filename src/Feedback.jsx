@@ -444,13 +444,25 @@ function FeedbackForm({ type, onBack }) {
 }
 
 // ─── KOMPONEN UTAMA ──────────────────────────────────────────
+// Baca hash link (#kritik-saran, #kritik, #saran) untuk buka bagian yang tepat otomatis.
+function viewFromHash() {
+  const h = window.location.hash.replace("#", "");
+  if (h === "kritik" || h === "saran") return h;
+  return "choose";
+}
+
 export default function Feedback() {
-  const [view, setView] = useState("choose"); // choose | kritik | saran
+  const [view, setView] = useState(viewFromHash);
   const box = useRef(null);
   const first = useRef(true);
 
   useEffect(() => {
-    if (first.current) { first.current = false; return; }
+    if (first.current) {
+      first.current = false;
+      // Baru dibuka lewat link langsung → langsung gulir ke bagian ini juga.
+      if (window.location.hash) box.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
     box.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [view]);
 
