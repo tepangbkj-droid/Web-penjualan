@@ -6,6 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { WA_STORE_NUMBER } from "./config.js";
 import Turnstile, { turnstileEnabled } from "./Turnstile.jsx";
+import { getFormToken } from "./formToken.js";
 
 // Ubah ke false bila foto struk tidak ingin diwajibkan.
 const REQUIRE_STRUK = true;
@@ -140,6 +141,8 @@ function FeedbackForm({ type, onBack }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null); // { ok, failed, message, waUrl }
   const startedAt = useRef(Date.now());
+  const tokenRef = useRef("");
+  useEffect(() => { getFormToken().then((t) => { tokenRef.current = t; }); }, []);
   const urls = useRef(new Set());
 
   // bersihkan URL preview saat komponen ditutup
@@ -263,6 +266,7 @@ function FeedbackForm({ type, onBack }) {
   };
 
   const submit = async () => {
+    if (loading) return; // cegah klik ganda / kirim berulang
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
@@ -286,9 +290,11 @@ function FeedbackForm({ type, onBack }) {
           files,
           hp,
           elapsed: Date.now() - startedAt.current,
+          formToken: tokenRef.current,
           cfToken,
         }),
       });
+      tokenRef.current = ""; // token hanya berlaku sekali
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
         const err = new Error(data.error || "");
@@ -301,6 +307,7 @@ function FeedbackForm({ type, onBack }) {
       setResult({ ok: false, message: friendly(err.status, err.message), waUrl });
       setCfToken("");
       setResetKey((k) => k + 1);
+      getFormToken().then((t) => { tokenRef.current = t; });
     } finally {
       setLoading(false);
     }

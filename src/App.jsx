@@ -9,6 +9,7 @@
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from "react";
 import { WA_STORE_NUMBER, fmtPrice } from "./config.js";
 import Turnstile, { turnstileEnabled } from "./Turnstile.jsx";
+import { getFormToken } from "./formToken.js";
 
 // Kritik & Saran dimuat belakangan (lazy) → halaman awal jauh lebih ringan.
 const Feedback = lazy(() => import("./Feedback.jsx"));
@@ -291,6 +292,8 @@ function CheckoutModal({ items, total, onClose }) {
   const [cfToken, setCfToken] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const startedAt = useRef(Date.now());
+  const tokenRef = useRef("");
+  useEffect(() => { getFormToken().then((t) => { tokenRef.current = t; }); }, []);
 
   const validate = () => {
     const e = {};
@@ -315,6 +318,7 @@ function CheckoutModal({ items, total, onClose }) {
     `Mohon dikonfirmasi ya, terima kasih! 🙏`;
 
   const handleSubmit = async () => {
+    if (loading) return; // cegah klik ganda / kirim berulang
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     if (turnstileEnabled && !cfToken) { setErrors({ captcha: "Selesaikan verifikasi keamanan dulu." }); return; }
@@ -335,14 +339,16 @@ function CheckoutModal({ items, total, onClose }) {
           items: items.map((i) => ({ label: i.label, qty: i.qty, price: i.price })),
           hp,
           elapsed: Date.now() - startedAt.current,
+          formToken: tokenRef.current,
           cfToken,
         }),
       });
+      tokenRef.current = ""; // token hanya berlaku sekali
       if (!res.ok) tgFailed = true;
     } catch (_) {
       tgFailed = true;
     }
-    if (tgFailed) { setTgError(true); setCfToken(""); setResetKey((k) => k + 1); }
+    if (tgFailed) { setTgError(true); setCfToken(""); setResetKey((k) => k + 1); getFormToken().then((t) => { tokenRef.current = t; }); }
 
     // AKSI B — WhatsApp redirect (tetap jalan walau Telegram gagal)
     const waUrl = `https://wa.me/${WA_STORE_NUMBER}?text=${encodeURIComponent(buildWaMsg())}`;
