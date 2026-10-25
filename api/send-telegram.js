@@ -9,12 +9,12 @@
 // ENV: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 // Opsional: TURNSTILE_SECRET_KEY, ALLOWED_ORIGINS
 // ============================================================
-import { guard, looksLikeBot, verifyTurnstile, clean, normalizePhone, getIp, tgCall } from "./_lib/security.js";
+import { guard, looksLikeBot, verifyTurnstile, clean, normalizePhone, getIp, tgCall, logSecurity } from "./_lib/security.js";
 
 const fmtPrice = (n) => "Rp " + Number(n).toLocaleString("id-ID");
 
 export default async function handler(req, res) {
-  if (!guard(req, res, { bucket: "order", max: 6, windowMs: 10 * 60 * 1000 })) return;
+  if (!(await guard(req, res, { bucket: "order", max: 6, windowMs: 10 * 60 * 1000, globalMax: 100 }))) return;
 
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
     return res.status(500).json({ error: "Server belum dikonfigurasi." });
@@ -22,8 +22,14 @@ export default async function handler(req, res) {
 
   const b = req.body && typeof req.body === "object" ? req.body : {};
 
-  if (looksLikeBot(b, 2000)) return res.status(400).json({ error: "Permintaan ditolak." });
-  if (!(await verifyTurnstile(b.cfToken, getIp(req)))) {
+  if (await looksLikeBot(b, 2000)) {
+    logSecurity("bot-suspect", req, { bucket: "order" });
+    return res.status(400).json({ error: "Permintaan ditolak. Muat ulang halaman lalu coba lagi." });
+  }
+  const cap = await verifyTurnstile(b.cfToken, getIp(req), req);
+  if (!cap.ok) {
+    if (cap.misconfigured) return res.status(500).json({ error: "Server belum dikonfigurasi." });
+    logSecurity("captcha-failed", req, { bucket: "order" });
     return res.status(403).json({ error: "Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi." });
   }
 
@@ -33,7 +39,10 @@ export default async function handler(req, res) {
   const date = /^\d{4}-\d{2}-\d{2}$/.test(b.date || "") ? b.date : null;
   const time = /^\d{2}:\d{2}$/.test(b.time || "") ? b.time : null;
 
-  if (!name || !phone || !type || !date || !time) {
+  const hh = time ? Number(time.slice(0, 2)) : 99, mm = time ? Number(time.slice(3)) : 99;
+  const dateOk = date && !Number.isNaN(Date.parse(date)) &&
+    Date.parse(date) > Date.now() - 2 * 86400000 && Date.parse(date) < Date.now() + 120 * 86400000;
+  if (!name || !phone || !type || !dateOk || hh > 23 || mm > 59) {
     return res.status(400).json({ error: "Data pesanan tidak lengkap / tidak valid." });
   }
 

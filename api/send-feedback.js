@@ -9,7 +9,7 @@
 // ============================================================
 import {
   guard, looksLikeBot, verifyTurnstile, clean, escapeHtml, countLinks,
-  normalizePhone, getIp, tgCall,
+  normalizePhone, getIp, tgCall, logSecurity,
 } from "./_lib/security.js";
 
 const MAX_TOTAL_BYTES = 3.2 * 1024 * 1024;
@@ -41,7 +41,7 @@ function fmtWhen(s) {
 }
 
 export default async function handler(req, res) {
-  if (!guard(req, res, { bucket: "feedback", max: 3, windowMs: 10 * 60 * 1000 })) return;
+  if (!(await guard(req, res, { bucket: "feedback", max: 3, windowMs: 10 * 60 * 1000, globalMax: 40, maxBytes: 4.5 * 1024 * 1024 }))) return;
 
   if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID) {
     return res.status(500).json({ error: "Server belum dikonfigurasi." });
@@ -51,8 +51,14 @@ export default async function handler(req, res) {
 
   const b = req.body && typeof req.body === "object" ? req.body : {};
 
-  if (looksLikeBot(b, 3000)) return res.status(400).json({ error: "Permintaan ditolak." });
-  if (!(await verifyTurnstile(b.cfToken, getIp(req)))) {
+  if (await looksLikeBot(b, 3000)) {
+    logSecurity("bot-suspect", req, { bucket: "feedback" });
+    return res.status(400).json({ error: "Permintaan ditolak. Muat ulang halaman lalu coba lagi." });
+  }
+  const cap = await verifyTurnstile(b.cfToken, getIp(req), req);
+  if (!cap.ok) {
+    if (cap.misconfigured) return res.status(500).json({ error: "Server belum dikonfigurasi." });
+    logSecurity("captcha-failed", req, { bucket: "feedback" });
     return res.status(403).json({ error: "Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi." });
   }
 

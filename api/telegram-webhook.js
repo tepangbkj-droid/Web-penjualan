@@ -9,14 +9,15 @@
 //
 // ENV: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_WEBHOOK_SECRET
 // ============================================================
-import { tgCall } from "./_lib/security.js";
+import { tgCall, safeEqual, logSecurity } from "./_lib/security.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(200).send("ok");
 
   const SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (!SECRET) return res.status(500).json({ error: "TELEGRAM_WEBHOOK_SECRET belum diset." });
-  if (req.headers["x-telegram-bot-api-secret-token"] !== SECRET) {
+  if (!safeEqual(req.headers["x-telegram-bot-api-secret-token"], SECRET)) {
+    logSecurity("webhook-bad-secret", req);
     return res.status(401).json({ error: "Invalid secret token" });
   }
 
@@ -25,6 +26,14 @@ export default async function handler(req, res) {
 
   const chatId = callback.message.chat.id;
   if (String(chatId) !== String(process.env.TELEGRAM_CHAT_ID)) return res.status(200).send("ok");
+
+  // Opsional: batasi siapa yang boleh menandai pembayaran (ID Telegram, pisahkan koma)
+  const allowed = (process.env.TELEGRAM_ALLOWED_USER_IDS || "").split(",").map((x) => x.trim()).filter(Boolean);
+  if (allowed.length && !allowed.includes(String(callback.from?.id))) {
+    await tgCall("answerCallbackQuery", { callback_query_id: callback.id, text: "⛔ Kamu tidak punya izin.", show_alert: true });
+    logSecurity("webhook-unauthorized-user", req, { user: callback.from?.id });
+    return res.status(200).send("ok");
+  }
 
   const oldText = callback.message.text || "";
   if (!oldText.includes("PESANAN BARU MASUK")) {
