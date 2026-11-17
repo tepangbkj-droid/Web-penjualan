@@ -636,6 +636,7 @@ export default function App() {
           </a>
         </div>
         <p>Freshly baked with love · {new Date().getFullYear()}</p>
+        <a href="/review" className="inline-block mt-3 text-[11px] text-purple-300/70 hover:text-[#F6C445] underline underline-offset-2">⭐ Review Crew</a>
       </footer>
 
       {/* FLOATING CART (mobile) */}
