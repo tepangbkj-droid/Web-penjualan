@@ -215,7 +215,7 @@ function ProductCard({ product, onAdd, priority = false }) {
 }
 
 // ─── CART SIDEBAR / PANEL ─────────────────────────────────────
-function Cart({ items, onQty, onRemove, onCheckout }) {
+function Cart({ items, onQty, onRemove, onNote, onCheckout }) {
   const total = items.reduce((s, i) => s + i.price * i.qty, 0);
 
   return (
@@ -230,7 +230,8 @@ function Cart({ items, onQty, onRemove, onCheckout }) {
         <>
           <div className="space-y-3 mb-4 max-h-72 overflow-y-auto pr-1">
             {items.map((item) => (
-              <div key={item.key} className="flex gap-2 items-start text-sm border-b border-purple-50 pb-3">
+              <div key={item.key} className="border-b border-purple-50 pb-3">
+               <div className="flex gap-2 items-start text-sm">
                 <div className="flex-1">
                   <p className="font-medium text-[#3B1464] text-xs leading-tight">{item.label}</p>
                   <p className="text-purple-500 text-xs">{fmtPrice(item.price)}</p>
@@ -241,6 +242,15 @@ function Cart({ items, onQty, onRemove, onCheckout }) {
                   <button onClick={() => onQty(item.key, 1)} className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 text-sm flex items-center justify-center hover:bg-purple-200">+</button>
                   <button onClick={() => onRemove(item.key)} className="w-6 h-6 rounded-full bg-red-50 text-red-400 text-xs flex items-center justify-center hover:bg-red-100 ml-1">✕</button>
                 </div>
+               </div>
+               <input
+                 type="text"
+                 maxLength={80}
+                 value={item.note || ""}
+                 onChange={(e) => onNote(item.key, e.target.value)}
+                 placeholder="Keterangan (opsional), mis. dipisah / tanpa topping"
+                 className="mt-2 w-full border border-purple-100 rounded-lg px-2.5 py-1.5 text-xs bg-white outline-none focus:ring-2 focus:ring-purple-300"
+               />
               </div>
             ))}
           </div>
@@ -283,7 +293,7 @@ function CheckoutModal({ items, total, onClose }) {
   };
 
   const buildDetail = () =>
-    items.map((i) => `- ${i.qty}x ${i.label} (${fmtPrice(i.price)})`).join("\n");
+    items.map((i) => `- ${i.qty}x ${i.label} (${fmtPrice(i.price)})${i.note ? ` — Ket: ${i.note}` : ""}`).join("\n");
 
   const buildWaMsg = () =>
     `Halo Tarobun! 👋 Saya ingin memesan:\n\n` +
@@ -314,7 +324,7 @@ function CheckoutModal({ items, total, onClose }) {
           type: form.type,
           date: form.date,
           time: form.time,
-          items: items.map((i) => ({ label: i.label, qty: i.qty, price: i.price })),
+          items: items.map((i) => ({ label: i.label, qty: i.qty, price: i.price, note: i.note || "" })),
           hp,
           elapsed: Date.now() - startedAt.current,
           formToken: tokenRef.current,
@@ -387,7 +397,7 @@ function CheckoutModal({ items, total, onClose }) {
               <p className="text-xs font-bold text-[#3B1464] mb-2 uppercase tracking-wide">Ringkasan Pesanan</p>
               {items.map((i) => (
                 <div key={i.key} className="flex justify-between text-xs text-purple-700 mb-1">
-                  <span>{i.qty}× {i.label}</span>
+                  <span>{i.qty}× {i.label}{i.note ? <em className="block text-[11px] text-purple-500 not-italic">📝 {i.note}</em> : null}</span>
                   <span>{fmtPrice(i.price * i.qty)}</span>
                 </div>
               ))}
@@ -494,6 +504,10 @@ export default function App() {
     setCart((prev) => prev.map((i) => i.key === key ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
   }, []);
 
+  const setNote = useCallback((key, note) => {
+    setCart((prev) => prev.map((i) => i.key === key ? { ...i, note: note.slice(0, 80) } : i));
+  }, []);
+
   const removeItem = useCallback((key) => {
     setCart((prev) => prev.filter((i) => i.key !== key));
   }, []);
@@ -501,7 +515,7 @@ export default function App() {
   const total      = cart.reduce((s, i) => s + i.price * i.qty, 0);
   const cartCount  = cart.reduce((s, i) => s + i.qty, 0);
 
-  const cartProps = { items: cart, onQty: adjustQty, onRemove: removeItem, onCheckout: () => setShowCheckout(true) };
+  const cartProps = { items: cart, onQty: adjustQty, onRemove: removeItem, onNote: setNote, onCheckout: () => setShowCheckout(true) };
 
   return (
     <div className="min-h-screen bg-[#FBF7EF] font-sans">
