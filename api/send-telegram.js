@@ -52,6 +52,7 @@ export default async function handler(req, res) {
       label: clean(i?.label, 200),
       qty: Number.isInteger(i?.qty) ? i.qty : 0,
       price: Number.isInteger(i?.price) ? i.price : -1,
+      note: clean(i?.note, 80),
     }))
     .filter((i) => i.label && i.qty >= 1 && i.qty <= 99 && i.price >= 0 && i.price <= 1_000_000);
 
@@ -60,7 +61,7 @@ export default async function handler(req, res) {
   }
 
   const total = items.reduce((s, i) => s + i.price * i.qty, 0);
-  const detail = items.map((i) => `- ${i.qty}x ${i.label} (${fmtPrice(i.price)})`).join("\n");
+  const detail = items.map((i) => `- ${i.qty}x ${i.label} (${fmtPrice(i.price)})${i.note ? ` — Ket: ${i.note}` : ""}`).join("\n");
 
   // Teks polos (tanpa parse_mode) → aman dari karakter aneh & mudah di-parse webhook.
   const text =
