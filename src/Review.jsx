@@ -1,10 +1,11 @@
 // Halaman internal crew: Customer Experience Review → Telegram (via /api/send-review).
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { PRODUCTS } from "./products.js";
 import { REVIEW_CODE_REQUIRED } from "./config.js";
 import Turnstile, { turnstileEnabled } from "./Turnstile.jsx";
 import { getFormToken } from "./formToken.js";
 
+const PhotoStudio = lazy(() => import("./PhotoStudio.jsx"));
 const MAX_PHOTOS = 3;
 const MAX_TOTAL = 3.2 * 1024 * 1024;
 const GROUPS = [["🍞 Tarobun Satuan", PRODUCTS.buns], ["📦 Family Pack", PRODUCTS.packs], ["🧋 Taro Latte", PRODUCTS.drinks]];
@@ -49,6 +50,7 @@ export default function Review() {
   const [hp, setHp] = useState("");
   const [cfToken, setCfToken] = useState("");
   const [resetKey, setResetKey] = useState(0);
+  const [studio, setStudio] = useState(null);
   const [busy, setBusy] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
@@ -79,11 +81,19 @@ export default function Review() {
       const blob = await compress(file);
       if (photos.reduce((a, x) => a + x.blob.size, 0) + blob.size > MAX_TOTAL) return err("photo", "Total foto terlalu besar. Hapus satu foto dulu.");
       const preview = URL.createObjectURL(blob); urls.current.add(preview);
-      setPhotos((p) => [...p, { id: Math.random().toString(36).slice(2), role, blob, preview }]);
-      err("photo", "");
+      const id = Math.random().toString(36).slice(2);
+      setPhotos((p) => [...p, { id, role, blob, src: blob, st: null, preview }]);
+      err("photo", ""); setStudio(id);
     } catch { err("photo", "Foto tidak bisa dibaca. Coba ambil ulang."); }
     finally { setBusy(false); }
   };
+  const applyStudio = (blob, st) => {
+    const preview = URL.createObjectURL(blob); urls.current.add(preview);
+    setPhotos((x) => x.map((p) => { if (p.id !== studio) return p; URL.revokeObjectURL(p.preview); urls.current.delete(p.preview); return { ...p, blob, st, preview }; }));
+    setStudio(null);
+  };
+  const studioPhoto = photos.find((p) => p.id === studio);
+  const budget = Math.min(1.4 * 1024 * 1024, MAX_TOTAL - photos.filter((p) => p.id !== studio).reduce((a, x) => a + x.blob.size, 0));
   const dropPhoto = (p) => { URL.revokeObjectURL(p.preview); urls.current.delete(p.preview); setPhotos((x) => x.filter((i) => i.id !== p.id)); };
 
   const submit = async () => {
@@ -217,6 +227,7 @@ export default function Review() {
                       <div key={p.id} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-purple-100 bg-purple-50">
                         <img src={p.preview} alt="" className="w-full h-full object-cover" />
                         <span className="absolute bottom-0 inset-x-0 bg-black/55 text-white text-[10px] text-center py-0.5">{p.role === "selfie" ? "Selfie + Produk" : "Foto Produk"}</span>
+                        <button type="button" onClick={() => setStudio(p.id)} className="absolute top-1 left-1 px-1.5 h-5 rounded-full bg-white/90 text-[#3B1464] text-[10px] font-bold">✨ Hias</button>
                         <button type="button" onClick={() => dropPhoto(p)} aria-label="Hapus foto" className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-[10px]">✕</button>
                       </div>
                     ))}
@@ -254,6 +265,7 @@ export default function Review() {
         </div>
         <p className="text-center text-[11px] text-gray-400 mt-4">Tarobun · Green Pramuka Square</p>
       </main>
+      {studioPhoto && <Suspense fallback={null}><PhotoStudio photo={studioPhoto} budget={budget} onApply={applyStudio} onClose={() => setStudio(null)} /></Suspense>}
     </div>
   );
 }
