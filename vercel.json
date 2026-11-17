@@ -11,6 +11,9 @@
     },
     "api/form-token.js": {
       "maxDuration": 5
+    },
+    "api/send-review.js": {
+      "maxDuration": 30
     }
   },
   "headers": [
@@ -98,6 +101,25 @@
           "value": "no-store"
         }
       ]
+    },
+    {
+      "source": "/review",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/review",
+      "destination": "/index.html"
     }
   ]
 }
