@@ -6,6 +6,7 @@ import Turnstile, { turnstileEnabled } from "./Turnstile.jsx";
 import { getFormToken } from "./formToken.js";
 
 const PhotoStudio = lazy(() => import("./PhotoStudio.jsx"));
+const LiveCamera = lazy(() => import("./LiveCamera.jsx"));
 const MAX_PHOTOS = 3;
 const MAX_TOTAL = 3.2 * 1024 * 1024;
 const GROUPS = [["🍞 Tarobun Satuan", PRODUCTS.buns], ["📦 Family Pack", PRODUCTS.packs], ["🧋 Taro Latte", PRODUCTS.drinks]];
@@ -51,6 +52,7 @@ export default function Review() {
   const [cfToken, setCfToken] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const [studio, setStudio] = useState(null);
+  const [live, setLive] = useState(null);
   const [busy, setBusy] = useState(false);
   const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
@@ -87,6 +89,13 @@ export default function Review() {
     } catch { err("photo", "Foto tidak bisa dibaca. Coba ambil ulang."); }
     finally { setBusy(false); }
   };
+  const liveBudget = Math.min(1.4 * 1024 * 1024, MAX_TOTAL - photos.reduce((a, x) => a + x.blob.size, 0));
+  const addLive = ({ blob, src, st }) => {
+    const preview = URL.createObjectURL(blob); urls.current.add(preview);
+    setPhotos((p) => [...p, { id: Math.random().toString(36).slice(2), role: live, blob, src, st, preview }]);
+    err("photo", ""); setLive(null);
+  };
+  const openLive = (role) => { if (photos.length >= MAX_PHOTOS) return err("photo", `Maksimal ${MAX_PHOTOS} foto.`); setLive(role); };
   const applyStudio = (blob, st) => {
     const preview = URL.createObjectURL(blob); urls.current.add(preview);
     setPhotos((x) => x.map((p) => { if (p.id !== studio) return p; URL.revokeObjectURL(p.preview); urls.current.delete(p.preview); return { ...p, blob, st, preview }; }));
@@ -137,13 +146,12 @@ export default function Review() {
     getFormToken().then((t) => { tokenRef.current = t; });
   };
 
-  const cam = (role, icon, title, sub, capture) => (
-    <label className={`flex-1 flex flex-col items-center text-center gap-1 border-2 border-dashed rounded-2xl px-3 py-4 transition ${busy || photos.length >= MAX_PHOTOS ? "opacity-50 border-gray-200" : "border-purple-200 hover:border-[#3B1464] hover:bg-purple-50/60 cursor-pointer"}`}>
+  const cam = (role, icon, title, sub) => (
+    <button type="button" onClick={() => openLive(role)} disabled={busy || photos.length >= MAX_PHOTOS} className={`flex-1 flex flex-col items-center text-center gap-1 border-2 border-dashed rounded-2xl px-3 py-4 transition ${busy || photos.length >= MAX_PHOTOS ? "opacity-50 border-gray-200" : "border-purple-200 hover:border-[#3B1464] hover:bg-purple-50/60"}`}>
       <span className="text-3xl">{icon}</span>
       <span className="text-sm font-bold text-[#3B1464]">{title}</span>
       <span className="text-[11px] text-gray-400 leading-tight">{sub}</span>
-      <input type="file" accept="image/*" capture={capture} className="sr-only" disabled={busy || photos.length >= MAX_PHOTOS} onChange={pick(role)} />
-    </label>
+    </button>
   );
 
   return (
@@ -234,11 +242,11 @@ export default function Review() {
                   </div>
                 )}
                 <div className="flex gap-3">
-                  {cam("produk", "📷", "Foto Produk", "Kamera langsung ke produk", "environment")}
-                  {cam("selfie", "🤳", "Selfie + Produk", "Selfie customer bareng produk", "user")}
+                  {cam("produk", "📷", "Foto Produk", "Kamera + filter langsung")}
+                  {cam("selfie", "🤳", "Selfie + Produk", "Selfie bareng produk + filter")}
                 </div>
                 {busy && <p className="text-xs text-purple-500 mt-2">⏳ Memproses foto...</p>}
-                <p className="text-[11px] text-gray-400 mt-2">Foto diambil langsung dari kamera HP. Data lokasi pada foto otomatis dihapus.</p>
+                <p className="text-[11px] text-gray-400 mt-2">Pilih twibbon/bando langsung di kamera, lalu foto. Data lokasi pada foto otomatis dihapus.</p>
               </Field>
 
               {REVIEW_CODE_REQUIRED && (
@@ -265,6 +273,7 @@ export default function Review() {
         </div>
         <p className="text-center text-[11px] text-gray-400 mt-4">Tarobun · Green Pramuka Square</p>
       </main>
+      {live && <Suspense fallback={null}><LiveCamera role={live} budget={liveBudget} onCapture={addLive} onClose={() => setLive(null)} onNative={(e) => { const r = live; setLive(null); pick(r)(e); }} /></Suspense>}
       {studioPhoto && <Suspense fallback={null}><PhotoStudio photo={studioPhoto} budget={budget} onApply={applyStudio} onClose={() => setStudio(null)} /></Suspense>}
     </div>
   );
